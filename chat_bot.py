@@ -1,16 +1,16 @@
 import re
 import pandas as pd
 import pyttsx3
-from sklearn import preprocessing
-from sklearn.tree import DecisionTreeClassifier,_tree
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.svm import SVC
 import csv
 import warnings
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import export_text
+from sklearn import preprocessing
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split , cross_val_score
+from sklearn.tree import DecisionTreeClassifier, plot_tree , _tree
+from sklearn.ensemble import RandomForestClassifier
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -24,28 +24,19 @@ def main():
     y1 = y
 
     reduced_data = training.groupby(training['prognosis']).max()
-    #print(len(reduced_data))
 
     le = preprocessing.LabelEncoder()
     le.fit(y)
     y = le.transform(y)
 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=0)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.05, random_state=0)
     testx = testing[cols]
     testy = testing['prognosis']
     testy = le.transform(testy)
 
-    clf1 = DecisionTreeClassifier()
-    clf = clf1.fit(x_train, y_train)
-    scores = cross_val_score(clf, x_test, y_test, cv=3)
-    print ("Score for decision Tree : ", scores.mean())
-
-    tree_rules = export_text(clf, feature_names=list(x_train.columns))
-    print(tree_rules)
-
-    importances = clf.feature_importances_
-    indices = np.argsort(importances)[::-1]
-    features = cols
+    # plt.figure(figsize=(200,200))  # Adjust the figure size as needed
+    # plot_tree(clf, filled=True, feature_names=cols, class_names=le.classes_)
+    # plt.show()
 
     severityDictionary = {}
     description_list = {}
@@ -136,19 +127,16 @@ def main():
         y = df['prognosis']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=20)
 
-        # Initialize KNN classifier
-        knn_clf = KNeighborsClassifier(n_neighbors=5)  # You can adjust the number of neighbors as needed
+        rf_clf = RandomForestClassifier(n_estimators=50, random_state=20)
 
-        # Fit KNN classifier to training data
-        knn_clf.fit(X_train, y_train)
+        rf_clf.fit(X_train, y_train)
 
         symptoms_dict = {symptom: index for index, symptom in enumerate(X)}
         input_vector = np.zeros(len(symptoms_dict))
         for item in symptoms_exp:
             input_vector[[symptoms_dict[item]]] = 1
 
-        # Replace prediction with KNN classifier's prediction
-        return knn_clf.predict([input_vector])
+        return rf_clf.predict([input_vector])
 
 
     def print_disease(node):
@@ -157,24 +145,20 @@ def main():
         disease = le.inverse_transform(val[0])
         return list(map(lambda x:x.strip(),list(disease)))
 
-    def tree_to_code(tree, feature_names):
-        tree_ = tree.tree_
-        feature_name = [
-            feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
-            for i in tree_.feature
-        ]
-
-        chk_dis=",".join(feature_names).split(",")
+    def tree_to_code():
+        chk_dis=cols
+        feature_names = cols
         symptoms_present = []
+        parent_nodes = []
 
         while True:
 
-            print("\nEnter the main symptoms that you are experiencing  \t",end="->")
+            print("\nEnter the (3-4) main symptoms that you are experiencing for accurate consultation \t",end="->")
             disease_input = input("").lower()
             conf,cnf_dis=check_pattern(chk_dis,disease_input)
             if conf==1:
                 if(len(cnf_dis) > 0):
-                    print("Here are the searches related to your symptom: ")
+                    print("Please select the symtpoms by entering their ids(0 ,1 ,2..etc): ")
                     for num,it in enumerate(cnf_dis):
                         print(num,")",it)
                     if num!=0:
@@ -202,49 +186,36 @@ def main():
                 break
             except:
                 print("Enter valid input.")
-        
-        def dfs(node, symptoms_present):
-            if len(symptoms_present) == len(disease_input):
-                return symptoms_present, node  # Return both symptoms_present and val
-            if tree_.feature[node] != _tree.TREE_UNDEFINED:
-                name = feature_name[node]
-                threshold = tree_.threshold[node]
 
-                if name in disease_input_list:
-                    symptoms_present.append(name)
-
-                symptoms_present, node = dfs(tree_.children_left[node], symptoms_present)  # Update symptoms_present and val
-                symptoms_present, node = dfs(tree_.children_right[node], symptoms_present)  # Update symptoms_present and val
-            return symptoms_present, node  # Return updated symptoms_present and val
-
-
-        def recurse(node, depth):
+        def recurse(node, depth, tree_, feature_name):
             indent = "  " * depth
             if tree_.feature[node] != _tree.TREE_UNDEFINED:
                 name = feature_name[node]
                 threshold = tree_.threshold[node]
 
-                print("if ", name)
-
                 if name in disease_input_list:
                     val = 1
                 else:
                     val = 0
-                print(val, threshold)
+
                 if  val <= threshold:
-                    recurse(tree_.children_left[node], depth + 1)
+                    recurse(tree_.children_left[node], depth + 1, tree_, feature_name)
                 else:
                     symptoms_present.append(name)
-                    recurse(tree_.children_right[node], depth + 1)
-            else:
+                    parent_nodes.append(tree_.children_right[node])
+                    recurse(tree_.children_right[node], depth + 1, tree_, feature_name)
+            
+            return parent_nodes, symptoms_present
+
+        def checkMoreFeatures(node, symptoms_present, tree_):
                 present_disease = print_disease(tree_.value[node])
                 print( "You may have " , present_disease)
                 red_cols = reduced_data.columns 
                 symptoms_given = red_cols[reduced_data.loc[present_disease].values[0].nonzero()]
                 dis_list=list(symptoms_present)
-                if len(dis_list)!=0:
-                    print("symptoms present  " + str(list(symptoms_present)))
-                print("symptoms given "  +  str(list(symptoms_given)) )
+                # if len(dis_list)!=0:
+                #     print("symptoms present  " + str(list(symptoms_present)))
+                # print("symptoms given "  +  str(list(symptoms_given)) )
                 print("In addition to that, are you experiencing any of the following symptoms : ")
                 symptoms_exp= [] + disease_input_list
                 for syms in list(symptoms_given):
@@ -260,9 +231,9 @@ def main():
                         if(inp=="yes"):
                             symptoms_exp.append(syms)
 
-                print(symptoms_exp)
                 second_prediction=sec_predict(symptoms_exp)
-                # print(second_prediction)
+                print(second_prediction)
+
                 calc_condition(symptoms_exp,num_days)
                 if(present_disease[0]==second_prediction[0]):
                     print("You may have ", present_disease[0])
@@ -275,21 +246,37 @@ def main():
                     print("You may have ", present_disease[0], "or ", second_prediction[0])
                     print(description_list[present_disease[0]])
                     print(description_list[second_prediction[0]])
-
-                # print(description_list[present_disease[0]])
                 precution_list=precautionDictionary[present_disease[0]]
                 print("Take following measures : ")
                 for  i,j in enumerate(precution_list):
                     print(i+1,")",j)
 
-                # confidence_level = (1.0*len(symptoms_present))/len(symptoms_given)
-                # print("confidence level is " + str(confidence_level))
-                    
-        # for i in range(40):
-        #     symptoms_present, node = dfs(i, [])
-        #     print( i, symptoms_present)
-        recurse(0,1)
+        
 
+        df = pd.read_csv('Data/Training.csv')
+        X = df.iloc[:, :-1]
+        y = df['prognosis']
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=20)
+        rf_clf = RandomForestClassifier(n_estimators=50, random_state=20)  # You can adjust the number of estimators as needed
+        # Fit Random Forest classifier to training data
+        rf_clf.fit(X_train, y_train)
+        node_tree_symptom_mapping = {}
+        for i, tree in enumerate(rf_clf.estimators_):
+            tree_ = tree.tree_
+            feature_name = [
+                feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
+                for i in tree_.feature
+            ]
+            symptoms_present = []
+            returned_parent_nodes, confirm_symptoms_present = recurse(0,1, tree_, feature_name)
+            node_tree_symptom_mapping[(returned_parent_nodes[-1], tree_)] = confirm_symptoms_present
+        
+        symptoms_lengths = {item: len(symptoms) for item, symptoms in node_tree_symptom_mapping.items()}
+        item_with_longest_symptoms = max(symptoms_lengths, key=symptoms_lengths.get)
+        longest_symptoms_present = node_tree_symptom_mapping[item_with_longest_symptoms]
+
+        checkMoreFeatures(item_with_longest_symptoms[0], longest_symptoms_present, item_with_longest_symptoms[1])
+        
     for index, symptom in enumerate(x):
         symptoms_dict[symptom] = index
 
@@ -297,9 +284,9 @@ def main():
     getSeverityDict()
     getDescription()
     getprecautionDict() 
-    getInfo()
-    print(clf, cols)
-    tree_to_code(clf,cols)
+    #getInfo()
+    tree_to_code()
+
 
     print("----------------------------------------------------------------------------------------")
     
