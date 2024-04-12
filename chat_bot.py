@@ -85,7 +85,6 @@ def main():
             except:
                 pass
 
-
     def getprecautionDict():
         precautionDictionary
         with open('MasterData/symptom_precaution.csv') as csv_file:
@@ -93,9 +92,13 @@ def main():
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
             for row in csv_reader:
-                _prec={row[0]:[row[1],row[2],row[3],row[4]]}
+                # _prec={row[0]:[row[1],row[2],row[3],row[4]]}
+                # precautionDictionary.update(_prec)
+                if len(row) == 6:  # Check if the link column exists
+                    _prec= {row[0]: [row[1], row[2], row[3], row[4], row[5]]}  # Including the link as the fifth precaution
+                else:
+                    _prec = {row[0]: [row[1], row[2], row[3], row[4]]}
                 precautionDictionary.update(_prec)
-
 
     def getInfo():
         print("-----------------------------------HealthCare ChatBot-----------------------------------")
@@ -293,4 +296,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
