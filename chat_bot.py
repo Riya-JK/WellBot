@@ -10,6 +10,7 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split , cross_val_score
 from sklearn.tree import plot_tree , _tree
 from sklearn.ensemble import RandomForestClassifier
+from svc_chatbot import start_chatting
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -117,7 +118,7 @@ def main():
         regexp = re.compile(combined_pattern)
         pred_list=[item for item in dis_list if regexp.search(item)]
         if(len(pred_list) < 4):
-            print("Please enter a minimum of 4 symptoms for accurate diagnosis")
+            print("Please enter a minimum of 4 valid symptoms for accurate diagnosis")
             return -1,[]
         if(len(pred_list)>0):
             return 1,pred_list
@@ -297,7 +298,7 @@ def main():
     getprecautionDict() 
     getInfo()
     tree_to_code()
-
+    start_chatting()
 
     print("----------------------------------------------------------------------------------------")
     
