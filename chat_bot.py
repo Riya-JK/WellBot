@@ -17,6 +17,10 @@ import joblib
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
+description_list = {}
+precautionDictionary = {}
+disease_to_speciality_mapping = {}
+
 def save_model_if_accuracy_above_threshold(model, accuracy, threshold, filename):
     if accuracy > threshold:
         joblib.dump(model, filename)
@@ -55,10 +59,16 @@ def main():
     # plt.show()
 
     severityDictionary = {}
-    description_list = {}
+    # description_list = {}
     precautionDictionary = {}
     symptoms_dict = {}
 
+    def load_doctors_data():
+        global doctors_data
+        try:
+            doctors_data = pd.read_csv('MasterData/doctors.csv', encoding='utf-8')
+        except UnicodeDecodeError:
+            doctors_data = pd.read_csv('MasterData/doctors.csv', encoding='ISO-8859-1')
     
 
     def readn(nstr):
@@ -82,13 +92,42 @@ def main():
             print("\nIt might not be that bad but you should take precautions.")
 
 
+    # def getDescription():
+    #     with open('MasterData/symptom_Description.csv') as csv_file:
+    #         csv_reader = csv.reader(csv_file, delimiter=',')
+    #         line_count = 0
+    #         for row in csv_reader:
+    #             _description={row[0]:row[1]}
+    #             description_list.update(_description)
+    
     def getDescription():
-        with open('MasterData/symptom_Description.csv') as csv_file:
+        global description_list, disease_to_speciality_mapping
+        with open('MasterData/symptom_Description.csv', encoding='utf-8') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
-            line_count = 0
+            next(csv_reader, None)  # Skip the header
             for row in csv_reader:
-                _description={row[0]:row[1]}
-                description_list.update(_description)
+                if len(row) >= 3:
+                    disease = row[0].strip().lower()  # assuming the disease name is in the first column
+                    # _description = row[1].strip()      # assuming the description is in the second column
+                    # _description={row[0]:row[2]}
+                    _description = {row[0]:(row[1],row[2])}
+                    specialty = row[2].strip()        # assuming the specialty is in the third column
+                    description_list.update(_description)
+                    disease_to_speciality_mapping[disease] = specialty
+                else:
+                    print("Row format error, expected at least 3 columns:", row)
+        
+    def getDoctorRecommendations(specialty):
+        matches = doctors_data[doctors_data['speciality'].str.lower() == specialty.lower()]
+        if not matches.empty:
+            recommendations = matches.head(3)  # limit to top 3 matches for brevity
+            recommendations_info = recommendations.apply(
+                lambda row: f"{row['Doctor\'s Name']} - Specialty: {row['speciality']}, More Info: {row['Link']}",
+                axis=1
+            ).tolist()
+            recommendation_str = "\n".join(recommendations_info)
+            return f"For the specialty {specialty}, the following doctors are recommended:\n{recommendation_str}"
+        return "No specialist recommendation found for this specialty."
 
     def getSeverityDict():
         global severityDictionary
@@ -257,22 +296,24 @@ def main():
                             symptoms_exp.append(syms)
 
                 second_prediction=sec_predict(symptoms_exp)
-                print(second_prediction)
+                # print(second_prediction)
 
                 calc_condition(symptoms_exp,num_days)
                 if(len(present_disease) > 0 and len(second_prediction) > 0 and present_disease[0]==second_prediction[0]):
                     print("You may have ", present_disease[0])
-                    print(description_list[present_disease[0]])
-
-                    readn(f"You may have {present_disease[0]}")
-                    readn(f"{description_list[present_disease[0]]}")
+                    if present_disease[0] in description_list:
+                        print(description_list[present_disease[0]][0])
+                        readn(f"You may have {present_disease[0]}")
+                        readn(f"{description_list[present_disease[0]][0]}") 
+                    else:
+                        print("No description found")
 
                 else:
                     print("You may have ", present_disease[0], "or ", second_prediction[0])
                     if len(description_list) > 0:
-                        print(description_list[present_disease[0]])
+                        print(description_list[present_disease[0]][0])
                     if len(second_prediction) > 0:
-                        print(description_list[second_prediction[0]])
+                        print(description_list[second_prediction[0]][0])
 
                 # Check if present disease matches with medical history or second prediction
                 matched_with_medical_history = False
@@ -301,7 +342,16 @@ def main():
                 for  i,j in enumerate(precution_list):
                     print(i+1,")",j)
 
-        
+                
+                if type(present_disease)==list:
+                    specialty = disease_to_speciality_mapping.get(present_disease[0].lower(), "Unknown")
+                else:
+                    specialty = disease_to_speciality_mapping.get(present_disease.lower(), "Unknown")
+                doctor_recommendations = getDoctorRecommendations(specialty)
+                if present_disease[0].lower() in description_list:
+                    print(description_list[present_disease[0]][1].lower())
+
+                print(doctor_recommendations)
 
         df = pd.read_csv('Data/Training.csv')
         X = df.iloc[:, :-1]
@@ -342,6 +392,7 @@ def main():
         symptoms_dict[symptom] = index
 
     
+    load_doctors_data()
     getSeverityDict()
     getDescription()
     getprecautionDict() 
@@ -354,4 +405,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
