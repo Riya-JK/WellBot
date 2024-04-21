@@ -24,9 +24,9 @@ disease_to_speciality_mapping = {}
 def save_model_if_accuracy_above_threshold(model, accuracy, threshold, filename):
     if accuracy > threshold:
         joblib.dump(model, filename)
-        print("Model saved successfully.")
-    else:
-        print("Accuracy is not above the threshold. Model not saved.")
+    #     print("Model saved successfully.")
+    # else:
+    #     print("Accuracy is not above the threshold. Model not saved.")
 
 def evaluate_classifier(y_test, y_pred):
     accuracy = accuracy_score(y_test, y_pred)
@@ -365,9 +365,9 @@ def main():
         rf_clf.fit(X_train, y_train)
         y_pred = rf_clf.predict(X_test)
         accuracy, precision, recall = evaluate_classifier(y_test, y_pred)
-        print("Accuracy:", accuracy)
-        print("Precision:", precision)
-        print("Recall:", recall)
+        # print("Accuracy:", accuracy)
+        # print("Precision:", precision)
+        # print("Recall:", recall)
         save_model_if_accuracy_above_threshold(rf_clf, accuracy, 0.90, "my_model.joblib")
 
         node_tree_symptom_mapping = {}
