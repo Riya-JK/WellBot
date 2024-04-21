@@ -44,6 +44,8 @@ def main():
     precautionDictionary = {}
     symptoms_dict = {}
 
+    
+
     def readn(nstr):
         engine = pyttsx3.init()
 
@@ -99,6 +101,7 @@ def main():
 
 
     def getInfo():
+        global medical_history
         print("-----------------------------------HealthCare ChatBot-----------------------------------")
         print("Please enter the following information : ")
         print("\nName : ",end="->")
@@ -254,6 +257,29 @@ def main():
                         print(description_list[present_disease[0]])
                     if len(second_prediction) > 0:
                         print(description_list[second_prediction[0]])
+
+                # Check if present disease matches with medical history or second prediction
+                matched_with_medical_history = False
+
+                # Convert all strings to lowercase
+                present_disease_words = present_disease[0].lower().split()
+                second_prediction_words = second_prediction[0].lower().split()
+                medical_history_words = medical_history.lower().split()
+
+                # Check if any word in present disease or second prediction matches any word in medical history
+                for word in present_disease_words + second_prediction_words:
+                    if word in medical_history_words:
+                        matched_with_medical_history = True
+                        break
+
+                # Print message based on matching with medical history
+                if matched_with_medical_history:
+                    print("Your medical condition might be related to your past medical history.")
+                else:
+                    print("You don't have anything related to your past medical history.")
+
+                
+
                 precution_list=precautionDictionary[present_disease[0]]
                 print("Take following measures : ")
                 for  i,j in enumerate(precution_list):
