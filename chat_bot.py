@@ -94,7 +94,8 @@ def main():
                 if len(row) >= 3:
                     disease = row[0].strip().lower()  # assuming the disease name is in the first column
                     # _description = row[1].strip()      # assuming the description is in the second column
-                    _description={row[0]:row[1]}
+                    # _description={row[0]:row[2]}
+                    _description = {row[0]:(row[1],row[2])}
                     specialty = row[2].strip()        # assuming the specialty is in the third column
                     description_list.update(_description)
                     disease_to_speciality_mapping[disease] = specialty
@@ -279,22 +280,24 @@ def main():
                             symptoms_exp.append(syms)
 
                 second_prediction=sec_predict(symptoms_exp)
-                print(second_prediction)
+                # print(second_prediction)
 
                 calc_condition(symptoms_exp,num_days)
                 if(len(present_disease) > 0 and len(second_prediction) > 0 and present_disease[0]==second_prediction[0]):
                     print("You may have ", present_disease[0])
-                    print(description_list[present_disease[0]])
-
-                    readn(f"You may have {present_disease[0]}")
-                    readn(f"{description_list[present_disease[0]]}")
+                    if present_disease[0] in description_list:
+                        print(description_list[present_disease[0]][0])
+                        readn(f"You may have {present_disease[0]}")
+                        readn(f"{description_list[present_disease[0]][0]}") 
+                    else:
+                        print("No description found")
 
                 else:
                     print("You may have ", present_disease[0], "or ", second_prediction[0])
                     if len(description_list) > 0:
-                        print(description_list[present_disease[0]])
+                        print(description_list[present_disease[0]][0])
                     if len(second_prediction) > 0:
-                        print(description_list[second_prediction[0]])
+                        print(description_list[second_prediction[0]][0])
 
                 # Check if present disease matches with medical history or second prediction
                 matched_with_medical_history = False
@@ -324,16 +327,13 @@ def main():
                     print(i+1,")",j)
 
                 
-                print(present_disease)
                 if type(present_disease)==list:
-                    print("in our loop")
                     specialty = disease_to_speciality_mapping.get(present_disease[0].lower(), "Unknown")
                 else:
-                    print("in our else loop")
                     specialty = disease_to_speciality_mapping.get(present_disease.lower(), "Unknown")
                 doctor_recommendations = getDoctorRecommendations(specialty)
                 if present_disease[0].lower() in description_list:
-                    print(description_list[present_disease[0].lower()])
+                    print(description_list[present_disease[0]][1].lower())
 
                 print(doctor_recommendations)
 
