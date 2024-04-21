@@ -15,17 +15,11 @@ from svc_chatbot import start_chatting
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
-severityDictionary = {}
 description_list = {}
 precautionDictionary = {}
 disease_to_speciality_mapping = {}
-doctors_data = None
-symptoms_dict = {}
 
 def main():
-
-    # global doctors_data
-
     training = pd.read_csv('Data/Training.csv')
     testing = pd.read_csv('Data/Testing.csv')
     cols = training.columns
@@ -33,13 +27,6 @@ def main():
     x = training[cols]
     y = training['prognosis']
     y1 = y
-
-    def load_doctors_data():
-        global doctors_data
-        try:
-            doctors_data = pd.read_csv('MasterData/doctors.csv', encoding='utf-8')
-        except UnicodeDecodeError:
-            doctors_data = pd.read_csv('MasterData/doctors.csv', encoding='ISO-8859-1')
 
     reduced_data = training.groupby(training['prognosis']).max()
 
@@ -55,6 +42,19 @@ def main():
     # plt.figure(figsize=(200,200))  # Adjust the figure size as needed
     # plot_tree(clf, filled=True, feature_names=cols, class_names=le.classes_)
     # plt.show()
+
+    severityDictionary = {}
+    # description_list = {}
+    precautionDictionary = {}
+    symptoms_dict = {}
+
+    def load_doctors_data():
+        global doctors_data
+        try:
+            doctors_data = pd.read_csv('MasterData/doctors.csv', encoding='utf-8')
+        except UnicodeDecodeError:
+            doctors_data = pd.read_csv('MasterData/doctors.csv', encoding='ISO-8859-1')
+    
 
     def readn(nstr):
         engine = pyttsx3.init()
@@ -84,6 +84,7 @@ def main():
     #         for row in csv_reader:
     #             _description={row[0]:row[1]}
     #             description_list.update(_description)
+    
     def getDescription():
         global description_list, disease_to_speciality_mapping
         with open('MasterData/symptom_Description.csv', encoding='utf-8') as csv_file:
@@ -92,13 +93,14 @@ def main():
             for row in csv_reader:
                 if len(row) >= 3:
                     disease = row[0].strip().lower()  # assuming the disease name is in the first column
-                    description = row[1].strip()      # assuming the description is in the second column
+                    # _description = row[1].strip()      # assuming the description is in the second column
+                    _description={row[0]:row[1]}
                     specialty = row[2].strip()        # assuming the specialty is in the third column
-                    description_list[disease] = description
+                    description_list.update(_description)
                     disease_to_speciality_mapping[disease] = specialty
                 else:
                     print("Row format error, expected at least 3 columns:", row)
-
+        
     def getDoctorRecommendations(specialty):
         matches = doctors_data[doctors_data['speciality'].str.lower() == specialty.lower()]
         if not matches.empty:
@@ -110,7 +112,6 @@ def main():
             recommendation_str = "\n".join(recommendations_info)
             return f"For the specialty {specialty}, the following doctors are recommended:\n{recommendation_str}"
         return "No specialist recommendation found for this specialty."
-
 
     def getSeverityDict():
         global severityDictionary
@@ -127,18 +128,18 @@ def main():
 
 
     def getprecautionDict():
-        global precautionDictionary
+        precautionDictionary
         with open('MasterData/symptom_precaution.csv') as csv_file:
 
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
             for row in csv_reader:
-                if len(row) >= 5:
-                    _prec={row[0]:[row[1],row[2],row[3],row[4]]}
-                    precautionDictionary.update(_prec)
+                _prec={row[0]:[row[1],row[2],row[3],row[4]]}
+                precautionDictionary.update(_prec)
 
 
     def getInfo():
+        global medical_history
         print("-----------------------------------HealthCare ChatBot-----------------------------------")
         print("Please enter the following information : ")
         print("\nName : ",end="->")
@@ -188,15 +189,6 @@ def main():
         val  = node.nonzero() 
         disease = le.inverse_transform(val[0])
         return list(map(lambda x:x.strip(),list(disease)))
-
-    # def print_disease(node):
-    #     node = node[0]
-    #     val = node.nonzero()
-    #     disease = le.inverse_transform(val[0])
-    #     disease_list = list(map(lambda x: x.strip(), list(disease)))
-    #     if len(disease_list) == 1 and len(disease_list[0]) == 1:
-    #         return []  # Return an empty list if the disease name is a single character
-    #     return disease_list
 
     def tree_to_code():
         chk_dis=cols
@@ -263,10 +255,8 @@ def main():
             return parent_nodes, symptoms_present
 
         def checkMoreFeatures(node, symptoms_present, tree_):
-                present_disease = print_disease(tree_.value[node])[0]
-                specialty = disease_to_speciality_mapping.get(present_disease.lower(), "Unknown")
-                # doctor_recommendations = getDoctorRecommendations(specialty)
-
+                present_disease = print_disease(tree_.value[node])
+                print( "You may have " , present_disease)
                 red_cols = reduced_data.columns 
                 symptoms_given = red_cols[reduced_data.loc[present_disease].values[0].nonzero()]
                 dis_list=list(symptoms_present)
@@ -305,17 +295,47 @@ def main():
                         print(description_list[present_disease[0]])
                     if len(second_prediction) > 0:
                         print(description_list[second_prediction[0]])
+
+                # Check if present disease matches with medical history or second prediction
+                matched_with_medical_history = False
+
+                # Convert all strings to lowercase
+                present_disease_words = present_disease[0].lower().split()
+                second_prediction_words = second_prediction[0].lower().split()
+                medical_history_words = medical_history.lower().split()
+
+                # Check if any word in present disease or second prediction matches any word in medical history
+                for word in present_disease_words + second_prediction_words:
+                    if word in medical_history_words:
+                        matched_with_medical_history = True
+                        break
+
+                # Print message based on matching with medical history
+                if matched_with_medical_history:
+                    print("Your medical condition might be related to your past medical history.")
+                else:
+                    print("You don't have anything related to your past medical history.")
+
+                
+
                 precution_list=precautionDictionary[present_disease[0]]
                 print("Take following measures : ")
                 for  i,j in enumerate(precution_list):
                     print(i+1,")",j)
-                    
-                doctor_recommendations = getDoctorRecommendations(specialty)
-                # print( "You may have " , present_disease)
-                if present_disease.lower() in description_list:
-                    print(description_list[present_disease.lower()])
-                print(doctor_recommendations)
 
+                
+                print(present_disease)
+                if type(present_disease)==list:
+                    print("in our loop")
+                    specialty = disease_to_speciality_mapping.get(present_disease[0].lower(), "Unknown")
+                else:
+                    print("in our else loop")
+                    specialty = disease_to_speciality_mapping.get(present_disease.lower(), "Unknown")
+                doctor_recommendations = getDoctorRecommendations(specialty)
+                if present_disease[0].lower() in description_list:
+                    print(description_list[present_disease[0].lower()])
+
+                print(doctor_recommendations)
 
         df = pd.read_csv('Data/Training.csv')
         X = df.iloc[:, :-1]
@@ -349,12 +369,12 @@ def main():
         symptoms_dict[symptom] = index
 
     
-    getInfo()
-    getDescription()
-    getSeverityDict()
     load_doctors_data()
+    getSeverityDict()
+    getDescription()
+    getprecautionDict() 
+    getInfo()
     tree_to_code()
-    # getprecautionDict()
     start_chatting()
 
     print("----------------------------------------------------------------------------------------")
