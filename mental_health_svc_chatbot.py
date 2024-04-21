@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
-
+import re
 import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -74,5 +74,9 @@ def start_chatting():
         
         # Implement response generation mechanism based on predicted intent
         response = data[data['Questions'] == predicted_intent]['Answers'].values[0] if predicted_intent in data['Questions'].values else "I'm sorry, I don't have a response for that question."
-        
-        print("Chatbot: " + response)
+        sentences = re.split(r'(?<=[.!?]) +', response)
+        if len(sentences) > 4:
+            limited_response = ' '.join(sentences[:4])
+        else:
+            limited_response = ' '.join(sentences)
+        print(limited_response)

@@ -10,10 +10,25 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split , cross_val_score
 from sklearn.tree import plot_tree , _tree
 from sklearn.ensemble import RandomForestClassifier
-from svc_chatbot import start_chatting
+from mental_health_svc_chatbot import start_chatting
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+import joblib
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
+
+def save_model_if_accuracy_above_threshold(model, accuracy, threshold, filename):
+    if accuracy > threshold:
+        joblib.dump(model, filename)
+        print("Model saved successfully.")
+    else:
+        print("Accuracy is not above the threshold. Model not saved.")
+
+def evaluate_classifier(y_test, y_pred):
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, average="weighted")
+    recall = recall_score(y_test, y_pred, average="weighted")
+    return accuracy, precision, recall
 
 def main():
     training = pd.read_csv('Data/Training.csv')
@@ -22,7 +37,7 @@ def main():
     cols = cols[:-1]
     x = training[cols]
     y = training['prognosis']
-    y1 = y
+    
 
     reduced_data = training.groupby(training['prognosis']).max()
 
@@ -117,11 +132,15 @@ def main():
     def check_pattern(dis_list,inp):
         pred_list=[]
         patterns = [pattern.strip().replace(' ', '_') for pattern in inp.split(',')]
-        combined_pattern = '|'.join(patterns)
+        combined_pattern = '|'.join(dis_list)
         regexp = re.compile(combined_pattern)
-        pred_list=[item for item in dis_list if regexp.search(item)]
-        if(len(pred_list) < 4):
-            print("Please enter a minimum of 4 valid symptoms for accurate diagnosis")
+        for item in patterns:
+            if regexp.search(item):
+                pred_list.append(item)
+            else:
+                print("Sorry, we don't have much info on this symptom : ", item)
+        if(len(pred_list) < 3):
+            print("\nPlease enter a minimum of 3 valid symptoms for accurate diagnosis")
             return -1,[]
         if(len(pred_list)>0):
             return 1,pred_list
@@ -218,13 +237,10 @@ def main():
 
         def checkMoreFeatures(node, symptoms_present, tree_):
                 present_disease = print_disease(tree_.value[node])
-                print( "You may have " , present_disease)
+                #print( "You may have " , present_disease)
                 red_cols = reduced_data.columns 
                 symptoms_given = red_cols[reduced_data.loc[present_disease].values[0].nonzero()]
                 dis_list=list(symptoms_present)
-                # if len(dis_list)!=0:
-                #     print("symptoms present  " + str(list(symptoms_present)))
-                # print("symptoms given "  +  str(list(symptoms_given)) )
                 print("In addition to that, are you experiencing any of the following symptoms : ")
                 symptoms_exp= [] + disease_input_list
                 for syms in list(symptoms_given):
@@ -294,6 +310,13 @@ def main():
         rf_clf = RandomForestClassifier(n_estimators=50, random_state=20)  # You can adjust the number of estimators as needed
         # Fit Random Forest classifier to training data
         rf_clf.fit(X_train, y_train)
+        y_pred = rf_clf.predict(X_test)
+        accuracy, precision, recall = evaluate_classifier(y_test, y_pred)
+        print("Accuracy:", accuracy)
+        print("Precision:", precision)
+        print("Recall:", recall)
+        save_model_if_accuracy_above_threshold(rf_clf, accuracy, 0.90, "my_model.joblib")
+
         node_tree_symptom_mapping = {}
         for i, tree in enumerate(rf_clf.estimators_):
             tree_ = tree.tree_
