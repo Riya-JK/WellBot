@@ -50,17 +50,16 @@ def start_chatting():
 
     # fig = px.bar(x=metrics, y=[scores[metric] for metric in metrics], labels={'x': 'Metrics', 'y': 'Score'})
     # fig.show()
-    print("\nHave any more questions? Would you like to chat with our Wellbot assistance?")
-    answer = input()
-    if(answer.lower() != "yes"):
-        print("Thank you for using our services!")
+    print("Chatbot: Do you have anymore questions?")
+    answer = input("User: ")
+    if("yes" not in answer.lower()):
+        print("Chatbot: Thank you for using our services!")
         return
     
-    print("\nWelcome to the Mental Health FAQ Chatbot!")
-    print("Ask a question or enter 'quit' to exit.")
+    print("\nChatbot: Ask a question or enter 'quit' to exit.")
 
     while True:
-        user_input = input("\nUser: ")
+        user_input = input("User: ")
         
         if user_input.lower() == 'quit':
             print("Chatbot: Goodbye! Thanks for chatting!")
@@ -75,8 +74,8 @@ def start_chatting():
         # Implement response generation mechanism based on predicted intent
         response = data[data['Questions'] == predicted_intent]['Answers'].values[0] if predicted_intent in data['Questions'].values else "I'm sorry, I don't have a response for that question."
         sentences = re.split(r'(?<=[.!?]) +', response)
-        if len(sentences) > 4:
-            limited_response = ' '.join(sentences[:4])
+        if len(sentences) > 7:
+            limited_response = ' '.join(sentences[:7])
         else:
             limited_response = ' '.join(sentences)
-        print(limited_response)
+        print("\n"+limited_response)

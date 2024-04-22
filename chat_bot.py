@@ -10,9 +10,9 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split , cross_val_score
 from sklearn.tree import plot_tree , _tree
 from sklearn.ensemble import RandomForestClassifier
-from mental_health_svc_chatbot import start_chatting
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 import joblib
+from mood_analyzer import start_mood_analysis
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -401,7 +401,7 @@ def main():
     getprecautionDict() 
     getInfo()
     tree_to_code()
-    start_chatting()
+    start_mood_analysis()
 
     print("----------------------------------------------------------------------------------------")
     
