@@ -74,8 +74,8 @@ def start_chatting():
         # Implement response generation mechanism based on predicted intent
         response = data[data['Questions'] == predicted_intent]['Answers'].values[0] if predicted_intent in data['Questions'].values else "I'm sorry, I don't have a response for that question."
         sentences = re.split(r'(?<=[.!?]) +', response)
-        if len(sentences) > 7:
-            limited_response = ' '.join(sentences[:7])
+        if len(sentences) > 5:
+            limited_response = ' '.join(sentences[:5])
         else:
             limited_response = ' '.join(sentences)
-        print("\n"+limited_response)
+        print("Chatbot: "+limited_response)

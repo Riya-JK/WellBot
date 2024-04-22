@@ -174,13 +174,11 @@ def main():
     def check_pattern(dis_list,inp):
         pred_list=[]
         patterns = [pattern.strip().replace(' ', '_') for pattern in inp.split(',')]
-        combined_pattern = '|'.join(dis_list)
+        combined_pattern = '|'.join(patterns)
         regexp = re.compile(combined_pattern)
-        for item in patterns:
+        for item in dis_list:
             if regexp.search(item):
                 pred_list.append(item)
-            else:
-                print("Sorry, we don't have much info on this symptom : ", item)
         if(len(pred_list) < 3):
             print("\nPlease enter a minimum of 3 valid symptoms for accurate diagnosis")
             return -1,[]
@@ -232,6 +230,8 @@ def main():
                     if num!=0:
                         print(f"Confirm the ones you meant (0 - {num}):  ", end="")
                         conf_input = input("").lower()
+                        if conf_input.endswith(","):
+                            conf_input = conf_input[:-1]
                         conf_inp = [int(x) for x in conf_input.split(',')]
                     else:
                         conf_inp=[0]
