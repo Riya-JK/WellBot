@@ -35,8 +35,8 @@ def evaluate_classifier(y_test, y_pred):
     return accuracy, precision, recall
 
 def main():
-    training = pd.read_csv('Data/Training.csv')
-    testing = pd.read_csv('Data/Testing.csv')
+    training = pd.read_csv('Disease_Dataset/Training.csv')
+    testing = pd.read_csv('Disease_Dataset/Testing.csv')
     cols = training.columns
     cols = cols[:-1]
     x = training[cols]
@@ -66,9 +66,9 @@ def main():
     def load_doctors_data():
         global doctors_data
         try:
-            doctors_data = pd.read_csv('MasterData/doctors.csv', encoding='utf-8')
+            doctors_data = pd.read_csv('Symptom_MasterData/doctors.csv', encoding='utf-8')
         except UnicodeDecodeError:
-            doctors_data = pd.read_csv('MasterData/doctors.csv', encoding='ISO-8859-1')
+            doctors_data = pd.read_csv('Symptom_MasterData/doctors.csv', encoding='ISO-8859-1')
     
 
     def readn(nstr):
@@ -102,7 +102,7 @@ def main():
     
     def getDescription():
         global description_list, disease_to_speciality_mapping
-        with open('MasterData/symptom_Description.csv', encoding='utf-8') as csv_file:
+        with open('Symptom_MasterData/symptom_Description.csv', encoding='utf-8') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader, None)  # Skip the header
             for row in csv_reader:
@@ -131,7 +131,7 @@ def main():
 
     def getSeverityDict():
         global severityDictionary
-        with open('MasterData/symptom_severity.csv') as csv_file:
+        with open('Symptom_MasterData/symptom_severity.csv') as csv_file:
 
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
@@ -144,7 +144,7 @@ def main():
 
     def getprecautionDict():
         precautionDictionary
-        with open('MasterData/symptom_precaution.csv') as csv_file:
+        with open('Symptom_MasterData/symptom_precaution.csv') as csv_file:
 
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
@@ -190,7 +190,7 @@ def main():
             return 0,[]
 
     def sec_predict(symptoms_exp):
-        df = pd.read_csv('Data/Training.csv')
+        df = pd.read_csv('Disease_Dataset/Training.csv')
         X = df.iloc[:, :-1]
         y = df['prognosis']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=20)
@@ -356,7 +356,7 @@ def main():
 
                 print(doctor_recommendations)
 
-        df = pd.read_csv('Data/Training.csv')
+        df = pd.read_csv('Disease_Dataset/Training.csv')
         X = df.iloc[:, :-1]
         y = df['prognosis']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=20)

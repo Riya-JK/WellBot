@@ -34,7 +34,7 @@ nltk.download('wordnet')
 
 def start_mood_analysis():
     # Load the CSV file to get a glimpse of its structure and content
-    file_path = 'Dataset/mood_detection_data.csv'
+    file_path = 'MentalHealth_Dataset/mood_detection_data.csv'
     data = pd.read_csv(file_path, encoding="ISO-8859-1")
 
     # Initialize the lemmatizer and stopwords list

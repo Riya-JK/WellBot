@@ -12,7 +12,7 @@ from string import punctuation
 
 def start_chatting():
     nRowsRead = 1000 # specify 'None' if want to read whole file
-    path_to_csv = 'Dataset/mentalhealth.csv'
+    path_to_csv = 'MentalHealth_Dataset/mentalhealth.csv'
     data = pd.read_csv(path_to_csv, delimiter=',', nrows = nRowsRead)
     data.dataframeName = 'Mental_Health_FAQ.csv'
 
