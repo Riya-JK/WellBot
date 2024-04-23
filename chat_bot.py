@@ -126,7 +126,7 @@ def main():
                 axis=1
             ).tolist()
             recommendation_str = "\n".join(recommendations_info)
-            return f"For the specialty {specialty}, the following doctors are recommended:\n{recommendation_str}"
+            return f"\nFor the specialty {specialty}, the following doctors are recommended:\n{recommendation_str}"
         return "No specialist recommendation found for this specialty."
 
     def getSeverityDict():
@@ -279,7 +279,7 @@ def main():
 
         def checkMoreFeatures(node, symptoms_present, tree_):
                 present_disease = print_disease(tree_.value[node])
-                #print( "You may have " , present_disease)
+                #print( "You may have" , present_disease)
                 red_cols = reduced_data.columns 
                 symptoms_given = red_cols[reduced_data.loc[present_disease].values[0].nonzero()]
                 dis_list=list(symptoms_present)
@@ -303,7 +303,7 @@ def main():
 
                 calc_condition(symptoms_exp,num_days)
                 if(len(present_disease) > 0 and len(second_prediction) > 0 and present_disease[0]==second_prediction[0]):
-                    print("You may have ", present_disease[0])
+                    print("You may have", present_disease[0])
                     if present_disease[0] in description_list:
                         print(description_list[present_disease[0]][0])
                         readn(f"You may have {present_disease[0]}")
@@ -341,7 +341,7 @@ def main():
                 
 
                 precution_list=precautionDictionary[present_disease[0]]
-                print("Take following measures : ")
+                print("\nTake following measures : ")
                 for  i,j in enumerate(precution_list):
                     print(i+1,")",j)
 
@@ -355,6 +355,7 @@ def main():
                     print(description_list[present_disease[0]][1].lower())
 
                 print(doctor_recommendations)
+                print("\nLoading your wellness assisstant ....")
 
         df = pd.read_csv('Disease_Dataset/Training.csv')
         X = df.iloc[:, :-1]

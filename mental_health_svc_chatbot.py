@@ -7,8 +7,11 @@ import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 from string import punctuation
+import seaborn as sns
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 
 def start_chatting():
     nRowsRead = 1000 # specify 'None' if want to read whole file
@@ -43,13 +46,13 @@ def start_chatting():
     # Evaluate the model
     y_pred = model.predict(X_test_vec)
     report = classification_report(y_test, y_pred)
-    # print(report)
 
-    # metrics = ['precision', 'recall', 'f1-score', 'support']
-    # scores = classification_report(y_test, y_pred, output_dict=True)['weighted avg']
+    # wordcloud = WordCloud(width=800, height=400, background_color='white').generate(' '.join(data['Questions']))
+    # plt.figure(figsize=(10, 5))
+    # plt.imshow(wordcloud, interpolation='bilinear')
+    # plt.axis('off')
+    # plt.show()
 
-    # fig = px.bar(x=metrics, y=[scores[metric] for metric in metrics], labels={'x': 'Metrics', 'y': 'Score'})
-    # fig.show()
     print("Chatbot: Do you have anymore questions?")
     answer = input("User: ")
     if("yes" not in answer.lower()):

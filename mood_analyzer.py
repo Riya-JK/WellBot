@@ -32,6 +32,7 @@ nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
+
 def start_mood_analysis():
     # Load the CSV file to get a glimpse of its structure and content
     file_path = 'MentalHealth_Dataset/mood_detection_data.csv'
@@ -95,7 +96,7 @@ def start_mood_analysis():
 
     # Create a Logistic Regression model
     model = LogisticRegression(max_iter=1000)
-
+    
     # Train the model
     model.fit(X_train, y_train)
 
@@ -104,6 +105,12 @@ def start_mood_analysis():
     accuracy = accuracy_score(y_test, predictions)
 
     def begin():
+        print("\nHave any more questions? Would you like to chat with our Wellbot assistance?")
+        answer = input()
+        if(answer.lower() != "yes"):
+            print("Thank you for using our services!")
+            return
+        
         print("\nHello! I'm WellBot, your Mental Health Assistant. How are you feeling today?")
 
         user_input = input("User: ")
