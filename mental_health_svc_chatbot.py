@@ -11,7 +11,8 @@ from sklearn.metrics import classification_report, confusion_matrix
 from string import punctuation
 import seaborn as sns
 import matplotlib.pyplot as plt
-from wordcloud import WordCloud
+
+
 
 def start_chatting():
     nRowsRead = 1000 # specify 'None' if want to read whole file
@@ -45,13 +46,6 @@ def start_chatting():
 
     # Evaluate the model
     y_pred = model.predict(X_test_vec)
-    report = classification_report(y_test, y_pred)
-
-    # wordcloud = WordCloud(width=800, height=400, background_color='white').generate(' '.join(data['Questions']))
-    # plt.figure(figsize=(10, 5))
-    # plt.imshow(wordcloud, interpolation='bilinear')
-    # plt.axis('off')
-    # plt.show()
 
     print("Chatbot: Do you have anymore questions?")
     answer = input("User: ")
@@ -82,3 +76,4 @@ def start_chatting():
         else:
             limited_response = ' '.join(sentences)
         print("Chatbot: "+limited_response)
+

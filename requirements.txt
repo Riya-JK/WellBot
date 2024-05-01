@@ -4,8 +4,6 @@ pyttsx3
 matplotlib
 absl-py==2.1.0
 astunparse==1.6.3
-cachetools==5.3.2
-certifi==2023.11.17
 charset-normalizer==3.3.2
 click==8.1.7
 contourpy==1.1.1
@@ -33,7 +31,6 @@ oauthlib==3.2.2
 opt-einsum==3.3.0
 pandas==2.0.3
 pillow==10.2.0
-protobuf==4.25.2
 pyasn1==0.5.1
 pyasn1-modules==0.3.0
 pyparsing==3.1.1
@@ -47,11 +44,5 @@ tensorboard-data-server==0.7.2
 tensorflow
 tensorflow-estimator==2.13.0
 tensorflow-macos
-termcolor==2.4.0
-tqdm==4.66.1
-typing_extensions==4.5.0
-tzdata==2023.4
-urllib3==2.1.0
-Werkzeug==3.0.1
-wrapt==1.16.0
 plotly
+torch

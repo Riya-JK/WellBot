@@ -3,18 +3,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import nltk
+import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from mental_health_svc_chatbot import start_chatting
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
-import re
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.optimizers import Adam
-from nltk.tokenize import word_tokenize
-from tensorflow.keras.callbacks import Callback
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
