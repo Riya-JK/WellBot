@@ -12,7 +12,7 @@ Run the following command to install all the dependencies :
 
 pip install -r .\requirements.txt
 
-Run the application by executin the following command : 
+Run the application by executing the following command : 
 
 cd .\Project\
 
@@ -21,6 +21,7 @@ python.exe .\chat_bot.py
 Sample prompts for interaction with chatbot :
 
 -----------------------------------HealthCare ChatBot-----------------------------------
+
 Please enter the following information : 
 
 Name : ->Kevin   
@@ -47,18 +48,31 @@ How many days have you been experiencing this symptom ? : 3
 In addition to that, are you experiencing any of the following symptoms : 
 
 continuous_sneezing ? : yes
+
 chills ? : yes
+
 fatigue ? : yes
+
 fever ? : yes
+
 swelled_lymph_nodes ? : no
+
 malaise ? : yes
+
 phlegm ? : yes
+
 throat_irritation ? : yes
+
 redness_of_eyes ? : no
+
 sinus_pressure ? : no
+
 congestion ? : yes
+
 chest_pain ? : no
+
 loss_of_smell ? : no
+
 muscle_pain ? : no
 
 It might not be that bad but you should take precautions.
